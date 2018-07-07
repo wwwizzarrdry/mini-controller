@@ -1,0 +1,148 @@
+html {
+  margin: 0px;
+  padding: 0px;
+  transition: all 350ms ease-in-out;
+  overflow: hidden;
+}
+
+body {
+  background: rgba(0,0,0,0);
+  margin: 0px;
+  padding: 0px;
+}
+
+::-webkit-scrollbar-thumb {
+  display: none;
+}
+
+.pad-5 {
+  padding: 5px;
+}
+
+/* App */
+#app_bubble {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+}
+
+#app_bubble > div.md-fab-toolbar.md-fab-active.md-fab-animated {
+  height: 100px;
+}
+.track-info {
+  width: calc(100% - 72px);
+  text-align: left;
+  color: #f0f0f0;
+  margin-top: 3px;
+  padding: 3px;
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+.track-info .album  {
+  font-size: 0.8em;
+  font-weight: 600
+}
+.track-info .artist  {
+  font-size: 0.75em;
+  font-weight: 500
+}
+
+#drag_handle_container {
+  position: absolute; 
+  bottom: 68px; 
+  right: 0px; 
+  border-radius: 50%;
+  background: rgba(0,0,0,0.1);
+  z-index: 1;
+  transition: all 350ms ease-in-out;
+}
+#drag_handle_container:hover {
+  background: rgba(0,0,0,0.5);
+}
+
+#drag_handle {
+  -webkit-user-select: none;
+  -webkit-app-region: drag;
+}
+
+#fab_services {
+  position: absolute; 
+  bottom: 14px;
+  right: 20px;
+}
+
+#fab_main_menu {
+  position: absolute; 
+  bottom: 14px; 
+  right: 65px;
+}
+
+#fab_main_menu > .md-fab, #fab_services > .md-fab {
+  width: 32px;
+  height: 32px;
+}
+#fab_main_menu > .md-fab i, #fab_services > .md-fab i {
+  font-size: 24px;
+  line-height: 32px;
+}
+.md-fab-speed-dial .md-fab-wrapper-small {
+  position: absolute;
+  bottom: 40px;
+  right: -2px;
+  min-height: 38px;
+  width: 38px;
+  z-index: -1;
+}
+.services-btn {
+    width: 38px !important;
+    height: 38px !important;
+    line-height: 36px !important;
+}
+
+.md-fab-sheet.md-fab-active {
+  height: 400px !important;
+  overflow: auto;
+}
+
+/* Media Controls */
+.md-fab-toolbar-actions {
+  user-select: none;
+  width: 100% !important;
+}
+.transport-volume i,
+.transport-shuffle i {
+  font-size: 1.5em !important;
+}
+
+.timer {
+  font-style: normal;
+  font-size: 16px !important;
+}
+#progress_flat {
+  position: fixed;
+  right: 18px;
+  bottom: 115px;
+  opacity: 0;
+  z-index: -1;
+  transition: all 140ms ease-in-out;
+}
+#progress_round {
+  position: fixed;
+  right: 8px;
+  bottom: 8px;
+  opacity: 1;
+  z-index: -1;
+  transition: all 140ms ease-in-out;
+}
+svg path {
+  will-change: auto;
+  stroke-width: 20px;
+  stroke-miterlimit: round;
+  transition: stroke-dashoffset 850ms ease-in-out;
+}
+
+.md-fab-active #progress_round {
+  opacity: 0;
+}
+.md-fab-animated.md-fab-active #progress_flat {
+  opacity: 1;
+}

@@ -1,10 +1,42 @@
 {
+  "author": "Ian Celing",
+  "license": "MIT",
   "name": "mini-controller",
   "version": "0.0.1",
   "description": "Mini controller for Roon, Sonos,Plex and LastFM",
+  "bugs": {
+    "url": "https://github.com/wwwizzarrdry/mini-controller/issues"
+  },
+  "homepage": "https://github.com/wwwizzarrdry/mini-controller#readme",
+  "devDependencies": {
+    "electron": "^2.0.4",
+    "electron-packager": "latest"
+  },
   "main": "app.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron . --enable-transparent-visuals --disable-gpu",
+    "win32": "electron-packager . myApp --platform=win32 --arch=ia32",
+    "win64": "electron-packager . myApp --platform=win32 --arch=x64",
+    "linux32": "electron-packager . myApp --platform=linux --arch=ia32",
+    "linux64": "electron-packager . myApp --platform=linux --arch=x64",
+    "osx": "electron-packager . myApp --platform=darwin --arch=x64",
+    "build": "electron-packager . --all"
+  },
+  "dependencies": {
+    "command-line-args": "^5.0.2",
+    "command-line-usage": "^5.0.3",
+    "config": "^1.30.0",
+    "electron-window-state": "^4.1.1",
+    "jquery": "^3.3.1",
+    "js-cookie": "^2.2.0",
+    "node-roon-api": "github:roonlabs/node-roon-api",
+    "node-roon-api-browse": "github:roonlabs/node-roon-api-browse",
+    "node-roon-api-image": "github:roonlabs/node-roon-api-image",
+    "node-roon-api-status": "github:roonlabs/node-roon-api-status",
+    "node-roon-api-transport": "github:roonlabs/node-roon-api-transport",
+    "socket.io": "latest",
+    "socket.io-client": "latest",
+    "vue": "^2.5.16"
   },
   "repository": {
     "type": "git",
@@ -18,14 +50,5 @@
     "Electron",
     "MiniPlayer",
     "MiniController"
-  ],
-  "author": "Ian Celing",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/wwwizzarrdry/mini-controller/issues"
-  },
-  "homepage": "https://github.com/wwwizzarrdry/mini-controller#readme",
-  "devDependencies": {
-    "electron": "^2.0.4"
-  }
+  ]
 }
