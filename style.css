@@ -3,12 +3,16 @@ html {
   padding: 0px;
   transition: all 350ms ease-in-out;
   overflow: hidden;
+  max-width: 400px;
+  max-height: 400px;
 }
 
 body {
   background: rgba(0,0,0,0);
   margin: 0px;
   padding: 0px;
+  max-width: 400px;
+  max-height: 400px;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -18,32 +22,63 @@ body {
 .pad-5 {
   padding: 5px;
 }
+.no-height {
+  height: 0 !important;
+}
 
 /* App */
 #app_bubble {
   position: fixed;
   right: 20px;
   bottom: 20px;
+  max-width: 400px;
+}
+.setting-btn {
+  width: 24px;
+  height: 24px;
 }
 
 #app_bubble > div.md-fab-toolbar.md-fab-active.md-fab-animated {
   height: 100px;
 }
+
+.md-fab-toolbar-actions>a, .md-fab-toolbar-actions>button {
+  margin: -6px 6px 0px 6px !important;
+}
 .track-info {
-  width: calc(100% - 72px);
+  width: calc(100% - 110px);
   text-align: left;
   color: #f0f0f0;
   margin-top: 3px;
   padding: 3px;
-  border-bottom: 1px solid rgba(255,255,255,0.15);
+  border-bottom: 1px solid rgba(255,255,255,0.35);
 }
-.track-info .album  {
-  font-size: 0.8em;
+.popup-info {
+  font-size: 24px !important;
+  line-height: 34px !important;
+}
+#popup_info  {
+  position: absolute;
+  height: 350px;
+  width: 400px;
+  bottom: 100px;
+  left: 10px;
+  z-index: -1;
+  transition: all 250ms cubic-bezier(0.075, 0.82, 0.165, 1);
+  background: #f0f0f0;
+  background-image: url("assets/img/gallery/altj.jpg");
+  background-size: cover;
+  background-position: top;
+  background-repeat: no-repeat;
+}
+.track-info .song-title  {
+  font-size: 0.85em;
   font-weight: 600
 }
-.track-info .artist  {
+.track-info .artist, .track-info .album  {
   font-size: 0.75em;
-  font-weight: 500
+  font-weight: 500;
+  display: inline-block;
 }
 
 #drag_handle_container {
@@ -66,14 +101,14 @@ body {
 
 #fab_services {
   position: absolute; 
-  bottom: 14px;
-  right: 20px;
+  bottom: 10px;
+  right: 180px;
 }
 
 #fab_main_menu {
   position: absolute; 
-  bottom: 14px; 
-  right: 65px;
+  bottom: 10px; 
+  right: 226px;
 }
 
 #fab_main_menu > .md-fab, #fab_services > .md-fab {
@@ -119,7 +154,7 @@ body {
 }
 #progress_flat {
   position: fixed;
-  right: 18px;
+  right: 10px;
   bottom: 115px;
   opacity: 0;
   z-index: -1;

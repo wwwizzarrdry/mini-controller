@@ -1,6 +1,7 @@
 // Electron
 var remote = require('electron').remote;
 var win = remote.getCurrentWindow();
+
 // Shadow Box on Move
 win.on("move", function( event ) {
 	console.log("move", event.sender.getBounds() );
@@ -14,34 +15,10 @@ var movetimer = function() {
 	},1000);
 };
 
-// Socket.io
-var socket = require('socket.io-client')('http://localhost:3000');
-function showNotify(msg, style, pos, timeout, cb){
-	UIkit.notify({
-		message: msg || "showNotify(msg, style, pos, timeout, cb)",
-		style: style || "danger",
-		pos: pos || "bottom-right", 
-		timeout: timeout || 3000,
-		onClose: (typeof cb !== "undefined") ? cb() : false
-	})
-	//new Notification(options[0].title,options[0]);
-}
-socket.on('new message',function(data){
-	UIkit.notify('<table><tr class="active"><td><strong>'+data.user+'</strong>: '+data.msg+'</td></tr></table>');
-})
-socket.on('get users',function(data){
-	var html ='';
-	for(i=0;i<data.length;i++){
-		html += '<li><div id="pic"></div><div id="username">'+data[i]+'</div></li>';
-	}
-	html = '<ul>' + html + '</ul>';
-	showNotify();
-})
-
 // Focus Blure
 window.addEventListener("blur",  function(){ 
 	console.log("blur"); 
-	//collapse();
+	collapse();
 });
 window.addEventListener("focus", function(){ 
 	console.log("focus");
@@ -136,6 +113,10 @@ $("#show-button").click( function() {
 
 
 /* Media Controls */
+$(".popup-info").click( function() {
+	$("#popup_info").toggleClass("no-height");
+});
+
 $(".transport-pause").click( function() {
 	$("#main_icon").removeClass("timer").addClass("material-icons").html("play_arrow");
 	$audio[0].pause();

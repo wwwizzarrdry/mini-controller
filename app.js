@@ -64,7 +64,7 @@ const {app, BrowserWindow} = require('electron')
     win.show()
   
     // Open the DevTools.
-    //win.webContents.openDevTools()
+    win.webContents.openDevTools()
   
     // Emitted when the window is closed.
     win.on('closed', () => {
@@ -75,8 +75,6 @@ const {app, BrowserWindow} = require('electron')
     })
   }
 
-
-  
   // This method will be called when Electron has finished
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
@@ -99,14 +97,15 @@ const {app, BrowserWindow} = require('electron')
     }
   })
   
+
+
   // In this file you can include the rest of your app's specific main process
   // code. You can also put them in separate files and require them here.
   var RoonApi = require("node-roon-api"),
       RoonApiStatus = require("node-roon-api-status"),
       RoonApiTransport = require('node-roon-api-transport'),
       RoonApiImage     = require('node-roon-api-image'),
-      RoonApiBrowse    = require('node-roon-api-browse'),
-      Vue              = require('vue');
+      RoonApiBrowse    = require('node-roon-api-browse');
        
   var core;
   var roon = new RoonApi({
@@ -117,28 +116,30 @@ const {app, BrowserWindow} = require('electron')
       email:               'masked',
       website:             'https://github.com/wwwizzarrdry/mini-controller',
       core_paired: function(core_) {
-        v.current_zone_id = roon.load_config("current_zone_id");
+        v.data.current_zone_id = roon.load_config("current_zone_id");
         core = core_;
         core.services.RoonApiTransport.subscribe_zones((response, msg) => {
             if (response == "Subscribed") {
                 let zones = msg.zones.reduce((p,e) => (p[e.zone_id] = e) && p, {});
-                v.$set('zones', zones);
+                v.data["zones"] = zones;
+                //v.$set('zones', zones);
             } else if (response == "Changed") {
                 var z;
                 if (msg.zones_removed) msg.zones_removed.forEach(e => delete(v.zones[e.zone_id]));
                 if (msg.zones_added)   msg.zones_added  .forEach(e => v.zones[e.zone_id] = e);
                 if (msg.zones_changed) msg.zones_changed.forEach(e => v.zones[e.zone_id] = e);
-                v.$set('zones', v.zones);
+                v.data["zones"] = zones;
+                //v.$set('zones', v.zones);
             }
         });
-        v.status = 'connected';
+        v.data.status = 'connected';
 
-        v.listoffset = 0;
+        v.data.listoffset = 0;
         refresh_browse();
     },
     core_unpaired: function(core_) {
 	core = undefined;
-        v.status = 'disconnected';
+        v.data.status = 'disconnected';
     }
   });
   
@@ -151,24 +152,21 @@ const {app, BrowserWindow} = require('electron')
   roon.start_discovery();
 
 
-
-
-// Roon App
-Vue.config.devtools = true;
-
-var v = new Vue({
-    el: "#app",
-    template: require('./root.html'),
-    data: function() { return {
-    server_ip: 'localhost',
-    server_port: 9100,
-    status:          'foo',
-        zones:           [],
-        current_zone_id: null,
-        listoffset:      0,
-        list:            null,
-        items:           [],
-    }},
+  // Roon App
+  // #################
+var v = new Object({
+    el: "#roon_tab",
+    template: require('./roon.html'),
+    data: { 
+            server_ip: 'localhost',
+            server_port: 9100,
+            status: 'foo',
+            zones: [],
+            current_zone_id: null,
+            listoffset: 0,
+            list: null,
+            items: []
+    },
     computed: {
         zone: function () {
             return this.zones[this.current_zone_id];
@@ -250,7 +248,7 @@ var v = new Vue({
 function refresh_browse(opts) {
     opts = Object.assign({
         hierarchy: "browse",
-        zone_or_output_id:  v.current_zone_id,
+        zone_or_output_id: v.current_zone_id,
     }, opts);
 
     core.services.RoonApiBrowse.browse(opts, (err, r) => {
@@ -259,8 +257,11 @@ function refresh_browse(opts) {
         console.log(err, r);
 
         if (r.action == 'list') {
-            v.$set("list", r.list);
-            v.$set("items", []);
+            v.data["lsit"] = r.list;
+            //v.$set("list", r.list);
+
+            v.data["items"] = [];
+            //v.$set("items", []);
             var listoffset = r.list.display_offset > 0 ? r.list.display_offset : 0;
             load_browse(listoffset);
 
@@ -269,7 +270,7 @@ function refresh_browse(opts) {
 
         } else if (r.action == 'replace_item') {
             var i = 0;
-            var l = v.items;
+            var l = v.data.items;
             while (i < l.length) {
                 if (l[i].item_key == opts.item_key) {
                     l.splice(i, 1, r.item);
@@ -277,11 +278,12 @@ function refresh_browse(opts) {
                 }
                 i++;
             }
-            v.$set("items", l);
+            v.data["items"] = l;
+            //v.$set("items", l);
 
         } else if (r.action == 'remove_item') {
             var i = 0;
-            var l = v.items;
+            var l = v.data.items;
             while (i < l.length) {
                 if (l[i].item_key == opts.item_key) {
                     l.splice(i, 1);
@@ -289,24 +291,30 @@ function refresh_browse(opts) {
                 }
                 i++;
             }
-            v.$set("items", l);
+            v.data["items"] = l;
+            //v.$set("items", l);
         }
     });
 }
 
 function load_browse(listoffset) {
     core.services.RoonApiBrowse.load({
-        hierarchy:          "browse",
-        offset:             listoffset,
+        hierarchy: "browse",
+        offset: listoffset,
         set_display_offset: listoffset,
     }, (err, r) => {
-        v.$set("listoffset", listoffset);
-        v.$set("items", r.items);
+        v.data["listoffset"] = listoffset;
+        //v.$set("listoffset", listoffset);
+
+        v.data["items"] = r.items;
+        //v.$set("items", r.items);
     });
 }
 
 var go = function() {
-    v.status = 'connecting';
-    roon.connect_to_host(v.server_ip, v.server_port, v.server_port, () => setTimeout(go, 3000));
+    console.log("v", JSON.stringify(v, null, 6));
+    v.data.status = 'connecting';
+    //v.status = 'connecting';
+    roon.connect_to_host(v.data.server_ip, v.data.server_port, v.data.server_port, () => setTimeout(go, 6000));
 };
 go();

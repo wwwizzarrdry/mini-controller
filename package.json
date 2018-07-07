@@ -8,10 +8,6 @@
     "url": "https://github.com/wwwizzarrdry/mini-controller/issues"
   },
   "homepage": "https://github.com/wwwizzarrdry/mini-controller#readme",
-  "devDependencies": {
-    "electron": "^2.0.4",
-    "electron-packager": "latest"
-  },
   "main": "app.js",
   "scripts": {
     "start": "electron . --enable-transparent-visuals --disable-gpu",
@@ -21,6 +17,14 @@
     "linux64": "electron-packager . myApp --platform=linux --arch=x64",
     "osx": "electron-packager . myApp --platform=darwin --arch=x64",
     "build": "electron-packager . --all"
+  },
+  "devDependencies": {
+    "electron": "^2.0.4",
+    "electron-packager": "latest",
+    "babel-preset-es2015": "^6.14.0",
+    "babelify": "^7.3.0",
+    "minifyify": "^7.3.3",
+    "partialify": "^3.1.6"
   },
   "dependencies": {
     "command-line-args": "^5.0.2",
