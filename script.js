@@ -1,6 +1,50 @@
 // Electron
+var ipcRenderer = require('electron').ipcRenderer;
 var remote = require('electron').remote;
 var win = remote.getCurrentWindow();
+
+// Receive data from main process
+ipcRenderer.on('send-data', function (event, payload) {
+	console.log(payload.event, payload);
+
+	switch(payload.event) {
+		case 'message': 
+				UIkit.modal.alert("<h3><i class='uk-icon-check'></i>" + payload.event  + "</h3><div class='uk-overflow-container'><pre>" + JSON.stringify(payload, null, 6) + "</pre></div>");
+				break;
+		case 'load_browse': 
+				UIkit.modal.alert("<h3><i class='uk-icon-check'></i>" + payload.event  + "</h3><div class='uk-overflow-container'><pre>" + JSON.stringify(payload, null, 6) + "</pre></div>");
+				break;
+		case 'core-subscribed':
+				UIkit.notify({
+					message: "<h3><i class='uk-icon-check'></i>" + payload.event  + "</h3><div class='uk-overflow-container'><pre>" + JSON.stringify(payload, null, 6) + "</pre></div>",
+					status: "info",
+					pos: "bottom-right"
+				});
+				break;
+		case 'core-changed':
+				break;
+		case 'core-connected':
+				UIkit.notify({
+					message: "<h3><i class='uk-icon-check'></i>" + payload.event  + "</h3><div class='uk-overflow-container'><pre>" + JSON.stringify(payload, null, 6) + "</pre></div>",
+					status: "success",
+					pos: "bottom-right"
+				});
+				break;
+		case 'core-disconnected':
+				UIkit.notify({
+					message: "<h3><i class='uk-icon-check'></i> " + payload.event  + "</h3><div class='uk-overflow-container' style='height: 200px;'><pre>" + JSON.stringify(payload, null, 6) + "</pre></div>",
+					status: "danger",
+					pos: "bottom-right"
+				});
+				break;
+		default: 
+		       UIkit.notify({
+				   message: "<h3><i class='uk-icon-check'></i>" + payload.event  + "</h3><div class='uk-overflow-container'><pre>" + JSON.stringify(payload, null, 6) + "</pre></div>",
+				   status: "",
+				   pos: "bottom-right"
+			   });
+	}
+});
 
 // Shadow Box on Move
 win.on("move", function( event ) {
@@ -15,7 +59,7 @@ var movetimer = function() {
 	},1000);
 };
 
-// Focus Blure
+// Focus Blur
 window.addEventListener("blur",  function(){ 
 	console.log("blur"); 
 	collapse();

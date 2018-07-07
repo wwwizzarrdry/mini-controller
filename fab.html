@@ -43,7 +43,7 @@
                                 </div>
                                 <div class="uk-width-9-10">
                                     <div class="song-title uk-text-truncate">Subterranean Homesick Blues</div>
-                                    <div><span class="artist uk-text-truncate">Bob Dylan</span> <span class="album uk-text-truncate">Bringing It All Back Home</span></div>
+                                    <div><span class="artist uk-text-truncate uk-margin-right">Bob Dylan</span> <span class="album uk-text-truncate">Bringing It All Back Home</span></div>
                                 </div>
                             </div>
                         </div>
@@ -76,47 +76,48 @@
                                             </ul>
                                             <ul id="tabs" class="uk-switcher uk-margin">
                                                 <li id="roon_tab">
-                                                    <div v-if='status == "connecting"'>
+                                                    <div id="roon_status">
                                                         Connecting...
                                                     </div>
-                                                    <div v-else>
-                                                        Zone: &nbsp;
-                                                        <select v-model="current_zone_id">
-                                                            <option v-for="zone in zones" :value="zone.zone_id">{{ zone.display_name }}</option>
+                                                    
+                                                    <div id="roon_zones">
+                                                        Zone:
+                                                        <select id="current_zone_id">
+                                                            <option value="zone.zone_id">{{ zone.display_name }}</option>
                                                         </select>
-                                                
-                                                        <div v-if='zone' class='zonetitle'>
+                                                        <div id='zone' class='zonetitle'>
                                                             {{zone.display_name}} ({{zone.state}}) {{zone.now_playing.image_key}}
                                                         </div>
-                                                        <div class='nowplaying' v-if='zone && zone.now_playing'>
-                                                            <div>
-                                                                <div style='display: inline-block;'>
-                                                                    <img v-if='zone.now_playing.image_key' :src="'http://' + server_domain + '/api/image/' + zone.now_playing.image_key + '?scale=fit&width=100&height=100'">
-                                                                </div>
-                                                                <div style='display: inline-block;'>
-                                                                    <div>{{zone.now_playing.three_line.line1}}</div>
-                                                                    <div>{{zone.now_playing.three_line.line2}}</div>
-                                                                    <div>{{zone.now_playing.three_line.line3}}</div>
-                                                                </div>
+                                                    </div>
+
+                                                    <div id='roon_nowplaying' v-if='zone.now_playing'>
+                                                        <div>
+                                                            <div style='display: inline-block;'>
+                                                                <img v-if='zone.now_playing.image_key' :src="'http://' + server_domain + '/api/image/' + zone.now_playing.image_key + '?scale=fit&width=100&height=100'">
                                                             </div>
+                                                            <div style='display: inline-block;'>
+                                                                <div>{{zone.now_playing.three_line.line1}}</div>
+                                                                <div>{{zone.now_playing.three_line.line2}}</div>
+                                                                <div>{{zone.now_playing.three_line.line3}}</div>
+                                                            </div>
+                                                        </div>
                                                 
-                                                            <div class='buttons' v-if='zone.state != "loading"'>
-                                                                <button @click="transport_playpause">{{ zone.state == 'playing' ? 'Pause' : 'Play' }}</button>
-                                                                <button @click="transport_stop">Stop</button>
-                                                                <button @click="transport_previous">&lt;&lt;</button>
-                                                                <button @click="transport_next">&gt;&gt;</button>
+                                                        <div class='buttons' v-if='zone.state != "loading"'>
+                                                            <button @click="transport_playpause">{{ zone.state == 'playing' ? 'Pause' : 'Play' }}</button>
+                                                            <button @click="transport_stop">Stop</button>
+                                                            <button @click="transport_previous">&lt;&lt;</button>
+                                                            <button @click="transport_next">&gt;&gt;</button>
+                                                        </div>
+                                                        
+                                                        <div style='margin-top: 1em;' v-if='zone.state != "loading"'>
+                                                            <tt style='display: inline-block; font-size: 0.8em'>{{to_time(zone.now_playing.seek_position)}}/{{to_time(zone.now_playing.length)}}</tt>
+                                                            <div :style='{ width: "440px", height: "4px", "background-color": "#aaa" }'>
+                                                                <div :style='{ width: 440 * zone.now_playing.seek_position / zone.now_playing.length + "px", height: "4px", "background-color": "#000" }'></div>
                                                             </div>
-                                                            <div style='margin-top: 1em;' v-if='zone.state != "loading"'>
-                                                                <tt style='display: inline-block; font-size: 0.8em'>{{to_time(zone.now_playing.seek_position)}}/{{to_time(zone.now_playing.length)}}</tt>
-                                                                <div :style='{ width: "440px", height: "4px", "background-color": "#aaa" }'>
-                                                                    <div :style='{ width: 440 * zone.now_playing.seek_position / zone.now_playing.length + "px", height: "4px", "background-color": "#000" }'></div>
-                                                                </div>
-                                                            </div>
-                                                
                                                         </div>
                                                     </div>
                                                 
-                                                    <div class='browser' v-if='list'>
+                                                    <div id='roon_browser' v-if='list'>
                                                         <div style='margin-bottom: 20px;'>
                                                             <a style='margin-right: 10px;' href="back" v-if='list.level != 0' @click.prevent='list_back()'>Back</a>
                                                             <a style='margin-right: 10px;' href="home" v-if='list.level != 0' @click.prevent='list_home()'>Home</a>
