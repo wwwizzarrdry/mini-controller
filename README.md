@@ -13,7 +13,9 @@ npm start
 
 ![Splash](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/gallery/splashscreen.PNG)
 
+
 **Collapsed**
+
 ![Collapsed 1](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/gallery/collapseed1.PNG)
 
 ![Collapsed 2](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/gallery/collapseed2.PNG)
@@ -22,14 +24,18 @@ npm start
 
 ![Collapsed 4](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/gallery/collapsed4.PNG)
 
+
 **Expanded**
+
 ![Expanded 1](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/gallery/expanded1.PNG)
 
 ![Expanded 2](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/gallery/expanded2.PNG)
 
 ![Expanded 3](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/gallery/expanded3.PNG)
 
+
 **Roon Extension Manager**
+
 ![Roon](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/gallery/extensions.PNG)
 
 
