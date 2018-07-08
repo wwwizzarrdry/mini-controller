@@ -34,16 +34,16 @@ const {app, BrowserWindow} = require('electron');
   function createWindow () {
     // Load the previous state with fallback to defaults
     let mainWindowState = windowStateKeeper({
-        defaultWidth: 400,
-        defaultHeight: 400
+        defaultWidth: 415,
+        defaultHeight: 415
     });
 
     // Create the window using the state information
     win = new BrowserWindow({
         'x': mainWindowState.x,
         'y': mainWindowState.y,
-        'width': mainWindowState.width,
-        'height': mainWindowState.height,
+        'width': 415, //mainWindowState.width,
+        'height': 415, //mainWindowState.height,
         overlayScrollbars: true,
         show: false,
         'node-integration': true,
@@ -79,7 +79,9 @@ const {app, BrowserWindow} = require('electron');
   // This method will be called when Electron has finished
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
-  app.on('ready', createSplash)
+  app.on('ready', function(){
+      createSplash()
+  })
   
   // Quit when all windows are closed.
   app.on('window-all-closed', () => {
@@ -97,7 +99,6 @@ const {app, BrowserWindow} = require('electron');
       createWindow()
     }
   })
-  
 
 // Send data to browser window
 function sendData(data, event_name){

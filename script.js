@@ -1,6 +1,7 @@
 // Electron
 var ipcRenderer = require('electron').ipcRenderer;
 var remote = require('electron').remote;
+var main = remote.require("./app.js");
 var win = remote.getCurrentWindow();
 
 // Receive data from main process
@@ -12,7 +13,7 @@ ipcRenderer.on('send-data', function (event, payload) {
 				UIkit.modal.alert("<h3><i class='uk-icon-check'></i>" + payload.event  + "</h3><div class='uk-overflow-container'><pre>" + JSON.stringify(payload, null, 6) + "</pre></div>");
 				break;
 		case 'load_browse': 
-				UIkit.modal.alert("<h3><i class='uk-icon-check'></i>" + payload.event  + "</h3><div class='uk-overflow-container'><pre>" + JSON.stringify(payload, null, 6) + "</pre></div>");
+		        UIkit.modal.alert("<h3><i class='uk-icon-check'></i>" + payload.event  + "</h3><div class='uk-overflow-container'><pre>" + JSON.stringify(payload, null, 6) + "</pre></div>");
 				break;
 		case 'core-subscribed':
 				UIkit.notify({
@@ -38,11 +39,7 @@ ipcRenderer.on('send-data', function (event, payload) {
 				});
 				break;
 		default: 
-		       UIkit.notify({
-				   message: "<h3><i class='uk-icon-check'></i>" + payload.event  + "</h3><div class='uk-overflow-container'><pre>" + JSON.stringify(payload, null, 6) + "</pre></div>",
-				   status: "",
-				   pos: "bottom-right"
-			   });
+		        UIkit.modal.alert("<h3><i class='uk-icon-check'></i>" + payload.event  + "</h3><div class='uk-overflow-container'><pre>" + JSON.stringify(payload, null, 6) + "</pre></div>");
 	}
 });
 
@@ -82,21 +79,25 @@ function collapse() {
 	var $fab_toolbar = $('.md-fab-toolbar');
 	var $fab_speeddial = $('.md-fab-speed-dial');
 	var $fab_sheet = $('.md-fab-sheet');
+	var $popup_info = $('#popup_info');
 
-	// Sheet
-	if( $fab_sheet.hasClass('md-fab-active') ) {
-		$fab_sheet.css({'height':'','width':''}).removeClass('md-fab-active');
-		setTimeout(function() {
-			$fab_sheet.removeClass('md-fab-animated');
-		},140);
-	};
-	// App
-	if( $fab_toolbar.hasClass('md-fab-active') ) {
-		$fab_toolbar.css('width','').removeClass('md-fab-active');
-		setTimeout(function() {
-			$fab_toolbar.removeClass('md-fab-animated');
-		},140);
-	};
+	$popup_info.addClass("no-height");
+	setTimeout(function(){
+		// Sheet
+		if( $fab_sheet.hasClass('md-fab-active') ) {
+			$fab_sheet.css({'height':'','width':''}).removeClass('md-fab-active');
+			setTimeout(function() {
+				$fab_sheet.removeClass('md-fab-animated');
+			},140);
+		};
+		// App
+		if( $fab_toolbar.hasClass('md-fab-active') ) {
+			$fab_toolbar.css('width','').removeClass('md-fab-active');
+			setTimeout(function() {
+				$fab_toolbar.removeClass('md-fab-animated');
+			},140);
+		};
+    }, 140);
 };
 
 /* window controls*/
