@@ -136,33 +136,42 @@
                 </div>
                 <div id="sonos_app" class="no-height">
                     <div class="uk-grid" style="padding: 15px 15px 0px 15px;" data-uk-grid-margin>
-                        <div class="uk-width-4-10">
+                        <div class="uk-width-5-10">
                             <div class="uk-width-1-1">
-                                <input type="checkbox" data-switchery data-switchery-color="#1e88e5" checked id="switch_sonos_primary" />
-                                <label for="switch_sonos_primary" class="inline-label">Label</label>
+                                <input type="checkbox" data-switchery data-switchery-color="#1e88e5" checked id="sonos_locked_master_volume" />
+                                <label for="sonos_locked_master_volume" class="inline-label">Lock Volume</label>
                             </div>
                             <div class="uk-width-1-1">
-                                <input type="checkbox" data-switchery data-switchery-color="#d32f2f" checked id="switch_sonos_danger" />
+                                <input type="checkbox" data-switchery data-switchery-color="#d32f2f" id="switch_sonos_danger" />
                                 <label for="switch_sonos_danger" class="inline-label">Label</label>
                             </div>
                             <div class="uk-width-1-1">
-                                <input type="checkbox" data-switchery data-switchery-color="#ffb300" checked id="switch_sonos_warning" />
+                                <input type="checkbox" data-switchery data-switchery-color="#ffb300" id="switch_sonos_warning" />
                                 <label for="switch_sonos_warning" class="inline-label">Label</label>
                             </div>
                             <div class="uk-width-1-1">
-                                <input type="checkbox" data-switchery data-switchery-color="#7cb342" checked id="switch_sonos_success" />
+                                <input type="checkbox" data-switchery data-switchery-color="#7cb342" id="switch_sonos_success" />
                                 <label for="switch_sonos_success" class="inline-label">Label</label>
                             </div>
                         </div>
-                        <div class="uk-width-6-10">
+                        <div class="uk-width-5-10" style="border-left: 1px solid #ccc;">
                             <div id="sonos_volume" class="uk-overflow-container">
-                                <input id="volume_1" class="sonos-volume"/>
-                                <input id="volume_2" class="sonos-volume"/>
-                                <input id="volume_3" class="sonos-volume"/>
-                                <input id="volume_4" class="sonos-volume"/>
-                                <input id="volume_5" class="sonos-volume"/>
-                                <input id="volume_6" class="sonos-volume"/>
-                                <input id="volume_7" class="sonos-volume"/>
+                                <label class="zp-vol-label" for="volume_master" data-sonos-volume="0">Master Volume</label>
+                                <input id="volume_master" class="sonos-volume" value="0"/>
+                                <label class="zp-vol-label" for="volume_1" data-sonos-volume="0">Zone Player 1</label>
+                                <input id="volume_1" class="sonos-volume master-locked"/>
+                                <label class="zp-vol-label" for="volume_2" data-sonos-volume="0">Zone Player 2</label>
+                                <input id="volume_2" class="sonos-volume master-locked"/>
+                                <label class="zp-vol-label" for="volume_3" data-sonos-volume="0">Zone Player 3</label>
+                                <input id="volume_3" class="sonos-volume master-locked"/>
+                                <label class="zp-vol-label" for="volume_4" data-sonos-volume="0">Zone Player 4</label>
+                                <input id="volume_4" class="sonos-volume master-locked"/>
+                                <label class="zp-vol-label" for="volume_5" data-sonos-volume="0">Zone Player 5</label>
+                                <input id="volume_5" class="sonos-volume master-locked"/>
+                                <label class="zp-vol-label" for="volume_6" data-sonos-volume="0">Zone Player 6</label>
+                                <input id="volume_6" class="sonos-volume master-locked"/>
+                                <label class="zp-vol-label" for="volume_7" data-sonos-volume="0">Zone Player 7</label>
+                                <input id="volume_7" class="sonos-volume master-locked"/>
                             </div>
                         </div>
                     </div>

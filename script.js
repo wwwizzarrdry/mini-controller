@@ -22,7 +22,7 @@ ipcRenderer.on('send-data', function (event, payload) {
 			   break;
 		case 'zoneStatus':
 		       //UIkit.modal.alert("<h3><i class='uk-icon-check'></i>" + payload.event  + "</h3><div class='uk-overflow-container'><pre>" + JSON.stringify(payload, null, 6) + "</pre></div>");
-			  console.log('zoneStatus', payload)
+			  //console.log('zoneStatus', payload)
 			   break;
 		case 'zoneList':
 		       //UIkit.modal.alert("<h3><i class='uk-icon-check'></i>" + payload.event  + "</h3><div class='uk-overflow-container'><pre>" + JSON.stringify(payload, null, 6) + "</pre></div>");
@@ -318,43 +318,73 @@ $(".lastfm-app").click( function(e) {
 });
 
 // Open Close event callback
+var $appWindow, sonosVolumeSliders = [false,[],"__masterslider__"];
 $document.on({
 	"roon_app_opened": function(event, data){
 		console.log(event, data);
-		var $this = $(data);
+		$appWindow = $(data);
 		UIkit.notify({message: "<img class='md-user-image' src='assets/icons/roon.png'> Roon Opened", timeout: 150, pos: "top-center"})	
 	},
 	"roon_app_closed": function(event, data){
-		var $this = $(data);
+		$appWindow = $(data);
 		UIkit.notify({message: "<img class='md-user-image' src='assets/icons/roon.png'> Roon Closed", timeout: 150, pos: "top-center"})
 	},
 	"plex_app_opened": function(event, data){
-		var $this = $(data);
+		$appWindow = $(data);
 		UIkit.notify({message: "<img class='md-user-image' src='assets/icons/plex.png'> Plex Opened", timeout: 150, pos: "top-center"})
 	},
 	"plex_app_closed": function(event, data){
-		var $this = $(data);
+		$appWindow = $(data);
 		UIkit.notify({message: "<img class='md-user-image' src='assets/icons/plex.png'> Plex Closed", timeout: 150, pos: "top-center"})
 	},
 	"sonos_app_opened": function(event, data){
-		var $this = $(data);
-		UIkit.notify({message: "<img class='md-user-image' src='assets/icons/sonos.png'> Sonos Opened", timeout: 150, pos: "top-center"})	
+		UIkit.notify({message: "<img class='md-user-image' src='assets/icons/sonos.png'> Sonos Opened", timeout: 150, pos: "top-center"})
+		$appWindow = $(data);
+
 		// Volume Controls
-		$.each($(".sonos-volume"), function(){
-			$(this).ionRangeSlider({
-				type: "single",
-				min: 0,
-				max: 100,
-				from: 25,
-				step: 1,
-				keyboard: true,
-				hide_min_max: true,
-				extra_classes: "uk-margin-remove",
-				onChange: function (data) {
-					console.log("onChange");
+		if(!sonosVolumeSliders[0]){
+			$.each($(".sonos-volume"), function(){
+				var $this = $(this);
+				// Initialize Label
+				$("label[for='" + $this.attr("id") + "']").attr("data-sonos-volume", $this.val() || 0);
+				
+				var $slider = $this.ionRangeSlider({
+					type: "single",
+					min: 0,
+					max: 100,
+					from: 0,
+					step: 1,
+					keyboard: true,
+					hide_min_max: true,
+					extra_classes: "uk-margin-remove,uk-margin-bottom,uk-padding-remove",
+					onChange: function (data) {
+						console.log("onChange", $this.prop("value"), data);
+						var $self = $(data.input), $label = $("label[for='" + $self.attr("id") + "']");
+						$label.attr("data-sonos-volume", data.from);
+					},
+					onFinish: function(data){
+						var $self = $(data.input);
+						// Master Volume (link all volumes)
+						if($self.attr("id") == "volume_master") {
+							$.each(sonosVolumeSliders[1], function(i){
+								$("label[for='" + sonosVolumeSliders[1][i].input.id + "']").attr("data-sonos-volume", $self.prop("value"));
+								sonosVolumeSliders[1][i].update({from: $self.prop("value")});
+							});
+						}
+					}
+				});
+
+				// store all zones (skip the master)
+				if($this.attr("id") !== "volume_master") {
+					sonosVolumeSliders[1].push($slider.data("ionRangeSlider"));
+				} else {
+					// Store master volume separately
+					sonosVolumeSliders[2] = $slider.data("ionRangeSlider");
 				}
+
 			});
-		});
+			sonosVolumeSliders[0] = true;
+		}
 	},
 	"sonos_app_closed": function(event, data){
 		var $this = $(data);
@@ -373,6 +403,16 @@ $document.on({
 		UIkit.notify.closeAll();
 	}
 });
+$document.on("change", "#sonos_locked_master_volume", function(){
+	$(".sonos-volume").toggleClass("master-locked");
+	if ($(this).is(':checked')) {
+		sonosVolumeSliders[2].update({ disable: false});
+	} else {
+		sonosVolumeSliders[2].update({ disable: true});
+	}
+	
+
+})
 $document.on("click", ".uk-alert-close.uk-close", function(){ $(this).closest(".uk-alert").remove(); })
 
 

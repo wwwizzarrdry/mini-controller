@@ -149,18 +149,42 @@ body {
   opacity: 1;
 }
 
+/* ROON */
 #roon_app {
   background-image: url("assets/icons/roon.png");
-} 
+}
+
+/* Plex */
 #plex_app {
   background-image: url("assets/icons/plex.png");
 } 
+
+/* SONOS */
 #sonos_app {
   background-image: url("assets/icons/sonos-alt.png");
 } 
 #sonos_volume {
   max-height: 200px;
 }
+#sonos_volume label.zp-vol-label::before {
+  content: attr(data-sonos-volume) '% ';
+  font-weight: 600;
+  color: #353535;
+  padding-right: 5px;
+}
+#sonos_volume label.zp-vol-label {
+  font-size: 10px;
+  color: #757575;
+  text-shadow: 1px 1px 0px #eee;
+  font-weight: 600;
+  position: absolute;
+  left: 0;
+}
+.sonos-volume.master-locked {
+ opacity: 0.5;
+}
+
+/* LastFM */
 #lastfm_app {
   background-image: url("assets/icons/lastfm.png");
 }
