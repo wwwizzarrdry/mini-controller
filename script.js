@@ -1,19 +1,43 @@
 // Electron
-var ipcRenderer = require('electron').ipcRenderer;
-var remote = require('electron').remote;
-var main = remote.require("./app.js");
-var win = remote.getCurrentWindow();
+const {webFrame} = require('electron')
+const ipcRenderer = require('electron').ipcRenderer;
+const remote = require('electron').remote;
+const main = remote.require("./app.js");
+const win = remote.getCurrentWindow();
+let currentZoomFactor = webFrame.getZoomFactor();
+
 
 // Receive data from main process
 ipcRenderer.on('send-data', function (event, payload) {
-	console.log(payload.event, payload);
-
+	//console.log(payload.event, payload);
 	switch(payload.event) {
+		case 'pairStatus':
+		       //UIkit.modal.alert("<h3><i class='uk-icon-check'></i>" + payload.event  + "</h3><div class='uk-overflow-container'><pre>" + JSON.stringify(payload, null, 6) + "</pre></div>");
+			   var pairEnabled = payload.pairEnabled;
+			   if (pairEnabled === true ) {
+				   showSection('nowPlaying');
+			   } else {
+	               showSection('pairDisabled');
+			   }  
+			   break;
+		case 'zoneStatus':
+		       //UIkit.modal.alert("<h3><i class='uk-icon-check'></i>" + payload.event  + "</h3><div class='uk-overflow-container'><pre>" + JSON.stringify(payload, null, 6) + "</pre></div>");
+			  console.log('zoneStatus', payload)
+			   break;
+		case 'zoneList':
+		       //UIkit.modal.alert("<h3><i class='uk-icon-check'></i>" + payload.event  + "</h3><div class='uk-overflow-container'><pre>" + JSON.stringify(payload, null, 6) + "</pre></div>");
+			   $(".zoneList").html("");
+			   if (payload !== undefined) {
+				   for (var x in payload){
+					   $(".zoneList").append("<button type=\"button\" class=\"buttonOverlay buttonZoneId\" id=\"button-" + payload[x].zone_id + "\" onclick=\"selectZone(\'" + payload[x].zone_id + "\', \'" + payload[x].display_name + "\')\">" + payload[x].display_name + "</button>");
+					}
+			   }
+			   break;
 		case 'message': 
-				UIkit.modal.alert("<h3><i class='uk-icon-check'></i>" + payload.event  + "</h3><div class='uk-overflow-container'><pre>" + JSON.stringify(payload, null, 6) + "</pre></div>");
+				UIkit.modal.alert("<h3><i class='material-icons'>chat</i>" + payload.event  + "</h3><div class='uk-overflow-container'><pre>" + JSON.stringify(payload, null, 6) + "</pre></div>");
 				break;
 		case 'load_browse': 
-		        UIkit.modal.alert("<h3><i class='uk-icon-check'></i>" + payload.event  + "</h3><div class='uk-overflow-container'><pre>" + JSON.stringify(payload, null, 6) + "</pre></div>");
+		        UIkit.modal.alert("<h3><i class='material-icons'>folder</i>" + payload.event  + "</h3><div class='uk-overflow-container'><pre>" + JSON.stringify(payload, null, 6) + "</pre></div>");
 				break;
 		case 'core-subscribed':
 				UIkit.notify({
@@ -39,9 +63,60 @@ ipcRenderer.on('send-data', function (event, payload) {
 				});
 				break;
 		default: 
-		        UIkit.modal.alert("<h3><i class='uk-icon-check'></i>" + payload.event  + "</h3><div class='uk-overflow-container'><pre>" + JSON.stringify(payload, null, 6) + "</pre></div>");
+		        //UIkit.notify({message: "<h3><i class='material-icons'>help</i>" + payload.event  + "</h3><div class='uk-overflow-container'><pre>" + JSON.stringify(payload, null, 6) + "</pre></div>", pos: "bottom-right"});
 	}
 });
+
+var data = new Object();
+var io = {
+	emit: function(event, data) {
+		ipcRenderer.send(event, data);
+	}
+};
+data.id = randID_generator();
+io.emit('connection', data);
+
+ipcRenderer.on('hello', (event, arg) => {  
+    console.log('hello: ', arg);
+});
+
+// To-Do
+function showSection(sectionName) {
+    switch (sectionName) {
+        case "nowPlaying":
+            $("#buttonMenu").show();
+            // Show Now Playing screen
+            $("#nowPlaying").show();
+            // Hide inactive sections
+            $("#pairDisabled").hide();
+            $("#libraryBrowser").hide();
+            $('#overlayMainMenu').hide();
+            break;
+        case "libraryBrowser":
+            $("#buttonMenu").show();
+            // Show libraryBrowser
+            $("#libraryBrowser").show();
+            // Hide inactive sections
+            $("#pairDisabled").hide();
+            $("#nowPlaying").hide();
+            $('#overlayMainMenu').hide();
+            break;
+        case "pairDisabled":
+            // Show pairDisabled section
+            $("#pairDisabled").show();
+            // Hide everthing else
+            $("#buttonMenu").hide();
+            $("#libraryBrowser").hide();
+            $("#nowPlaying").hide();
+            $("#pageLoading").hide();
+            break;
+        default:
+            break;
+        }
+    var t = setTimeout(function (){
+        $("#pageLoading").hide();
+    }, 250);
+}
 
 // Shadow Box on Move
 win.on("move", function( event ) {
@@ -59,7 +134,7 @@ var movetimer = function() {
 // Focus Blur
 window.addEventListener("blur",  function(){ 
 	console.log("blur"); 
-	collapse();
+	//collapse();
 });
 window.addEventListener("focus", function(){ 
 	console.log("focus");
@@ -156,37 +231,212 @@ $("#show-button").click( function() {
 	win.show();
 });
 
+$("#alwaystop-button").click( function() {
+	win.setAlwaysOnTop(((win.isAlwaysOnTop()) ? false : true));
+	$(this).find("i.material-icons").text(((win.isAlwaysOnTop()) ? "flip_to_back" : "flip_to_front"))
+});
+
+$("#zoomin-button").click( function() {
+	currentZoomFactor = currentZoomFactor + 0.05;
+	webFrame.setZoomFactor(currentZoomFactor);
+});
+
+$("#zoomout-button").click( function() {
+	currentZoomFactor = currentZoomFactor - 0.05;
+	webFrame.setZoomFactor(currentZoomFactor);
+});
+
+
+
+/* App Windows */
+var appWindowAnimTimer = function(appid, state) {
+	clearTimeout(appWindowAnimTimer);
+	setTimeout(function(){
+		$document.trigger("alert-closeAll");
+		$document.trigger(appid+"_"+state, $("#"+appid));
+		//ex. ("roon_app", "open");
+	},350);
+};
+$(".roon-app").click( function(e) {
+	e.preventDefault();
+	e.stopImmediatePropagation();
+	$("#popup_info").removeClass("active");
+
+	if ($("#roon_app").hasClass("active")) {
+		$("#roon_app,#plex_app,#sonos_app,#lastfm_app").addClass("no-height").removeClass("active");
+		appWindowAnimTimer("roon_app","closed");
+	} else {
+		$("#plex_app,#sonos_app,#lastfm_app").addClass("no-height").removeClass("active");
+		$("#roon_app").toggleClass("active no-height");
+		appWindowAnimTimer("roon_app","opened");
+	}
+});
+
+$(".plex-app").click( function(e) {
+	e.preventDefault();
+	e.stopImmediatePropagation();
+	$("#popup_info").removeClass("active");
+
+	if ($("#plex_app").hasClass("active")) {
+		$("#roon_app,#plex_app,#sonos_app,#lastfm_app").addClass("no-height").removeClass("active");
+		appWindowAnimTimer("plex_app","closed");
+	} else {
+		$("#roon_app,#sonos_app,#lastfm_app").addClass("no-height").removeClass("active");
+		$("#plex_app").toggleClass("active no-height");
+		appWindowAnimTimer("plex_app","opened");
+	}
+});
+
+$(".sonos-app").click( function(e) {
+	e.preventDefault();
+	e.stopImmediatePropagation();
+	$("#popup_info").removeClass("active");
+
+	if ($("#sonos_app").hasClass("active")) {
+		$("#roon_app,#plex_app,#sonos_app,#lastfm_app").addClass("no-height").removeClass("active");
+		appWindowAnimTimer("sonos_app","closed");
+	} else {
+		$("#roon_app,#plex_app,#lastfm_app").addClass("no-height").removeClass("active");
+		$("#sonos_app").toggleClass("active no-height");
+		appWindowAnimTimer("sonos_app","opened");
+	}
+});
+
+$(".lastfm-app").click( function(e) {
+	e.preventDefault();
+	e.stopImmediatePropagation();
+	$("#popup_info").removeClass("active");
+
+	if ($("#lastfm_app").hasClass("active")) {
+		$("#roon_app,#plex_app,#sonos_app,#lastfm_app").addClass("no-height").removeClass("active");
+		appWindowAnimTimer("lastfm_app","closed");
+	} else {
+		$("#roon_app,#plex_app,#sonos_app").addClass("no-height").removeClass("active");
+		$("#lastfm_app").toggleClass("active no-height");
+		appWindowAnimTimer("lastfm_app","opened");
+	}
+});
+
+// Open Close event callback
+$document.on({
+	"roon_app_opened": function(event, data){
+		console.log(event, data);
+		var $this = $(data);
+		UIkit.notify({message: "<img class='md-user-image' src='assets/icons/roon.png'> Roon Opened", timeout: 150, pos: "top-center"})	
+	},
+	"roon_app_closed": function(event, data){
+		var $this = $(data);
+		UIkit.notify({message: "<img class='md-user-image' src='assets/icons/roon.png'> Roon Closed", timeout: 150, pos: "top-center"})
+	},
+	"plex_app_opened": function(event, data){
+		var $this = $(data);
+		UIkit.notify({message: "<img class='md-user-image' src='assets/icons/plex.png'> Plex Opened", timeout: 150, pos: "top-center"})
+	},
+	"plex_app_closed": function(event, data){
+		var $this = $(data);
+		UIkit.notify({message: "<img class='md-user-image' src='assets/icons/plex.png'> Plex Closed", timeout: 150, pos: "top-center"})
+	},
+	"sonos_app_opened": function(event, data){
+		var $this = $(data);
+		UIkit.notify({message: "<img class='md-user-image' src='assets/icons/sonos.png'> Sonos Opened", timeout: 150, pos: "top-center"})	
+		// Volume Controls
+		$.each($(".sonos-volume"), function(){
+			$(this).ionRangeSlider({
+				type: "single",
+				min: 0,
+				max: 100,
+				from: 25,
+				step: 1,
+				keyboard: true,
+				hide_min_max: true,
+				extra_classes: "uk-margin-remove",
+				onChange: function (data) {
+					console.log("onChange");
+				}
+			});
+		});
+	},
+	"sonos_app_closed": function(event, data){
+		var $this = $(data);
+		UIkit.notify({message: "<img class='md-user-image' src='assets/icons/sonos.png'> Sonos Closed", timeout: 150, pos: "top-center"})
+	},
+	"lastfm_app_opened": function(event, data){
+		var $this = $(data);
+		UIkit.notify({message: "<img class='md-user-image' src='assets/icons/lastfm.png'> LastFM Opened", timeout: 150, pos: "top-center"})
+	},
+	"lastfm_app_closed": function(event, data){
+		var $this = $(data);
+		UIkit.notify({message: "<img class='md-user-image' src='assets/icons/lastfm.png'> LastFM Closed", timeout: 150, pos: "top-center"})
+	},
+	"alert-closeAll": function(){
+		$(".uk-app-window-alert").remove();
+		UIkit.notify.closeAll();
+	}
+});
+$document.on("click", ".uk-alert-close.uk-close", function(){ $(this).closest(".uk-alert").remove(); })
+
+
+// Prevent closing the Fab
+$("#roon_app,#plex_app,#sonos_app,#lastfm_app").click( function(e) {
+	e.preventDefault();
+	e.stopImmediatePropagation();
+});
+
+$("#popup_info").click( function(e) {
+	e.preventDefault();
+	e.stopImmediatePropagation();
+	if (!$("#popup_info").hasClass("no-height")) {
+		$(this).toggleClass("active")
+	}
+});
+
+
+
 
 /* Media Controls */
 $(".popup-info").click( function() {
+	//$("#roon_app,#plex_app,#sonos_app,#lastfm_app").addClass("no-height").removeClass("active");
+	/*
+	if ($("#popup_info").hasClass("no-height")) {
+		$("#popup_info").removeClass("active no-height");
+	} else {
+		$("#popup_info").addClass("active no-height");
+	} 
+	*/
 	$("#popup_info").toggleClass("no-height");
 });
 
 $(".transport-pause").click( function() {
 	$("#main_icon").removeClass("timer").addClass("material-icons").html("play_arrow");
-	$audio[0].pause();
+	//$audio[0].pause();
+	io.emit('goPause', data);
 	$pauseBtn.addClass("uk-hidden");
 	$playBtn.removeClass("uk-hidden");
+
 });
 
 $(".transport-play").click( function() {
 	$("#main_icon").removeClass("material-icons").addClass("timer").html("...");
-	$audio[0].play();
+	//$audio[0].play();
 	$playBtn.addClass("uk-hidden");
 	$pauseBtn.removeClass("uk-hidden");
+	io.emit('goPlay', data);
 });
 
 $(".transport-prev").click( function() {
 	$audio[0].currentTime = 0;
 	$pauseBtn.addClass("uk-hidden");
 	$playBtn.removeClass("uk-hidden");
+	io.emit('goPrev', data);
 });
 
 $(".transport-next").click( function() {
 	$audio[0].currentTime = $audio[0].duration;
 	$pauseBtn.addClass("uk-hidden");
 	$playBtn.removeClass("uk-hidden");
+	io.emit('goNext', data);
 });
+
 
 var volumes = [0, 0.25, 0.5, 0.75, 1];
 var curVol = 4;
@@ -211,10 +461,9 @@ var $viewToggle = $('#list_grid_toggle').children('a[data-view]'),
     // set view class on init
     $document.on('click', '#list_grid_toggle a[data-view]', function(e) {
         e.preventDefault();
-
         var $this = $(this),
-            isActive = $this.hasClass('uk-active');
-
+			isActive = $this.hasClass('uk-active');
+			
         if(!isActive) {
             var view = $this.attr('data-view');
             if(view == 'list_view') {
@@ -225,8 +474,6 @@ var $viewToggle = $('#list_grid_toggle').children('a[data-view]'),
             $this.addClass('uk-active').siblings().removeClass('uk-active');
         }
 	});
-	
-
 
 // Get all the SVG timeline Paths (Meters)
 var meters = document.querySelectorAll('svg[data-value] .meter');

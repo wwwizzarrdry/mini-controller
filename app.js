@@ -1,4 +1,5 @@
 const windowStateKeeper = require('electron-window-state');
+const ipcMain = require('electron').ipcMain;
 const {app, BrowserWindow} = require('electron');
 
   // Splash screen
@@ -6,18 +7,19 @@ const {app, BrowserWindow} = require('electron');
   function createSplash() {
       // Show the splash screen
       splash = new BrowserWindow({
+          'node-integration': true,
+          position: "center",
           width: 150, 
           height: 150, 
-          position: "center",
           show: false,
-          'node-integration': true,
+          frame: false,  
+          movable: false,
+          alwaysOnTop: true,
+          transparent: true,
           resizeable: false,
           skipTaskbar: true,
-          movable: false,
           maximizable: false,
-          minimizable: false,
-          transparent: true,
-          frame: false
+          minimizable: false
         });
         splash.loadFile('splash.html')
         splash.show();
@@ -80,9 +82,72 @@ const {app, BrowserWindow} = require('electron');
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
   app.on('ready', function(){
-      createSplash()
+      createSplash();
+        // Listen for async message from renderer process
+        var socket = ipcMain;
+        socket.on('connection', (event, arg) => {
+
+            // Send async message to renderer process
+            win.webContents.send('hello', arg);
+
+            // Send Data to Client
+            sendData("pairStatus", JSON.parse('{"pairEnabled": ' + pairStatus + '}'));
+
+            socket.on('getZone', function(){
+                sendData("zoneStatus", zoneStatus);
+            });
+
+            socket.on('changeVolume', function(msg) {
+                transport.change_volume(msg.output_id, "absolute", msg.volume);
+            });
+
+            socket.on('changeSetting', function(msg) {
+                var settings = [];
+
+                if (msg.setting == "shuffle") {
+                    settings.shuffle = msg.value;
+                } else if (msg.setting == "auto_radio") {
+                    settings.auto_radio = msg.value;
+                } else if (msg.setting == "loop") {
+                    settings.loop = msg.value;
+                }
+
+                transport.change_settings(msg.zone_id, settings, function(error){
+                });
+            });
+
+            socket.on('goPrev', function(msg) {
+                transport.control(msg, 'previous');
+            });
+
+            socket.on('goNext', function(msg) {
+                transport.control(msg, 'next');
+            });
+
+            socket.on('goPlayPause', function(msg) {
+                transport.control(msg, 'playpause');
+            });
+
+            socket.on('goPlay', function(msg) {
+                transport.control(msg, 'play');
+            });
+
+            socket.on('goPause', function(msg) {
+                transport.control(msg, 'pause');
+            });
+
+            socket.on('goStop', function(msg) {
+                transport.control(msg, 'stop');
+            });
+
+        });
+
+        // Make method externaly visible
+        exports.ping = arg => {  
+            console.log("ping", arg);
+        }
   })
-  
+
   // Quit when all windows are closed.
   app.on('window-all-closed', () => {
     // On macOS it is common for applications and their menu bar
@@ -99,9 +164,9 @@ const {app, BrowserWindow} = require('electron');
       createWindow()
     }
   })
-
+  
 // Send data to browser window
-function sendData(data, event_name){
+function sendData(event_name, data){
     event_name = (typeof event_name !== "undefined" && event_name.length) ? event_name : 'message';
     data.event = event_name;
     win.webContents.send("send-data", data);
@@ -110,6 +175,16 @@ function sendData(data, event_name){
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
+
+// Read config file
+//var config = require('config');
+//var configPort = config.get('server.port');
+
+var core, transport;
+var pairStatus = 0;
+var zoneStatus = [];
+var zoneList = [];
+
 function init(){
     // Roon Object
     var v = new Object({
@@ -218,33 +293,39 @@ function init(){
         website:             'https://github.com/wwwizzarrdry/mini-controller',
         core_paired: function(core_) {
             core = core_;
+            transport = core_.services.RoonApiTransport;
             v.data.current_zone_id = roon.load_config("current_zone_id");
-            core.services.RoonApiTransport.subscribe_zones((response, msg) => {
+            pairStatus = true;
+
+            // Update Client
+            sendData("pairStatus", JSON.parse('{"pairEnabled": ' + pairStatus + '}'));
+            
+            transport.subscribe_zones((response, msg) => {
                 if (response == "Subscribed") {
                     let zones = msg.zones.reduce((p,e) => (p[e.zone_id] = e) && p, {});
                     v.data.zones = zones;
-                    //v.$set('zones', zones);
-                    //sendData(v, "core-subscribed")
+
                 } else if (response == "Changed") {
                     var z;
                     if (msg.zones_removed) msg.zones_removed.forEach(e => delete(v.data.zones[e.zone_id]));
                     if (msg.zones_added)   msg.zones_added  .forEach(e => v.data.zones[e.zone_id] = e);
                     if (msg.zones_changed) msg.zones_changed.forEach(e => v.data.zones[e.zone_id] = e);
                     v.data.zones = v.data.zones;
-                    //v.$set('zones', v.zones);
-                    //sendData(v, "core-changed")
+                    
+                    sendData("zoneList", v.data.zones)
+                    sendData("zoneStatus", v)
                 }
             });
+            
             v.data.status = 'connected';
             v.data.listoffset = 0;
-
-            sendData(v, "connected");
             refresh_browse();
         },
         core_unpaired: function(core_) {
             core = undefined;
             v.data.status = 'disconnected';
-            sendData(v, "disconnected")
+            pairStatus = false;
+            sendData("pairStatus", JSON.parse('{"pairEnabled": ' + pairStatus + '}'));
         }
     });
 
@@ -256,7 +337,7 @@ function init(){
     });
 
     // Update Status text on Roon Extension
-    svc_status.set_status("All is good", false);
+    svc_status.set_status("Extenstion enabled", false);
 
     // Scan for Roon Cores
     roon.start_discovery();
@@ -268,19 +349,19 @@ function init(){
             zone_or_output_id: v.data.current_zone_id,
         }, opts);
         core.services.RoonApiBrowse.browse(opts, (err, r) => {
-            if (err) { console.log(err, r); return; }
+            if (err) { 
+                console.log(err, r);
+                return; 
+            }
             console.log(err, r);
+
             if (r.action == 'list') {
-                v.data["lsit"] = r.list;
-                //v.$set("list", r.list);
-                v.data["items"] = [];
-                //v.$set("items", []);
+                v.data.list = r.list;
+                v.data.items = [];
                 var listoffset = r.list.display_offset > 0 ? r.list.display_offset : 0;
                 load_browse(listoffset);
-
             } else if (r.action == 'message') {
                 alert((r.is_error ? "ERROR: " : "") + r.message);
-                sendData(r.message, "message");
             } else if (r.action == 'replace_item') {
                 var i = 0;
                 var l = v.data.items;
@@ -303,7 +384,6 @@ function init(){
                     i++;
                 }
                 v.data.items = l;
-                //v.$set("items", l);
             }
         });
     }
@@ -316,14 +396,13 @@ function init(){
         }, (err, r) => {
             v.data.listoffset = listoffset;
             v.data.items = r.items;
-            sendData(v, "load_browse");
+            sendData("load_browse", v);
         });
     }
 
     var go = function() {
         console.log("v", JSON.stringify(v, null, 6));
         v.data.status = 'connecting';
-        //v.status = 'connecting';
         roon.connect_to_host(v.data.server_ip, v.data.server_port, v.data.server_port, () => setTimeout(go, 3000));
     };
     go();

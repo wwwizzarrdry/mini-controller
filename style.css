@@ -22,6 +22,19 @@ body {
 .pad-5 {
   padding: 5px;
 }
+.pad-10 {
+  padding: 10px;
+}
+.pad-15 {
+  padding: 15px;
+}
+.pad-20 {
+  padding: 20px;
+}
+.pad-25 {
+  padding: 25px;
+}
+
 .no-height {
   height: 0 !important;
 }
@@ -29,6 +42,14 @@ body {
 .uk-overflow-container {
   max-height: 300px;
   overflow: auto;
+}
+
+.uk-app-window-alert {
+  position: fixed;
+  top: -15px;
+  left: -1px;
+  width: 360px;
+  border-radius: 0px;
 }
 
 /* App */
@@ -65,20 +86,7 @@ body {
   font-size: 24px !important;
   line-height: 34px !important;
 }
-#popup_info  {
-  position: absolute;
-  height: 300px;
-  width: 390px;
-  bottom: 100px;
-  left: 5px;
-  z-index: -1;
-  transition: all 250ms cubic-bezier(0.075, 0.82, 0.165, 1);
-  background: #f0f0f0;
-  background-image: url("assets/img/gallery/altj.jpg");
-  background-size: cover;
-  background-position: top;
-  background-repeat: no-repeat;
-}
+
 .track-info .song-title  {
   font-size: 0.85em;
   font-weight: 600
@@ -88,6 +96,80 @@ body {
   font-weight: 500;
   display: inline-block;
 }
+
+#popup_info {
+  position: absolute;
+  height: 395px;
+  width: 400px;
+  bottom: 0px;
+  left: 0px;
+  border-radius: 5px;
+  z-index: -1;
+  opacity: 1;
+  transition: all 350ms cubic-bezier(0.075, 0.82, 0.165, 1);
+  background: #f0f0f0;
+  background-image: url("assets/img/gallery/BobDylan.jpg");
+  background-size: cover;
+  background-position: top;
+  background-repeat: no-repeat;
+}
+#popup_info.active {
+  z-index: 1010;
+}
+
+#roon_app, #plex_app, #sonos_app, #lastfm_app {
+  position: absolute;
+  height: 300px;
+  width: 400px;
+  bottom: 100px;
+  left: 0px;
+  z-index: -1;
+  border-radius: 5px 5px 0 0;
+  /*transform: translateY(5px)!important;*/
+  transform-origin: bottom;
+  transition-delay: 0ms;
+  transition: all 350ms ease-in-out;
+  background: #f0f0f0;
+  background-size: cover;
+  background-position: top;
+  background-repeat: no-repeat;
+  background-blend-mode: overlay;
+}
+
+#roon_app.no-height, #roon_app.no-height *, 
+#plex_app.no-height, #plex_app.no-height *, 
+#sonos_app.no-height, #sonos_app.no-height *, 
+#lastfm_app.no-height, #lastfm_app.no-height * {
+  transition-delay: 50ms;
+  transform: scale(0.3,0.01);
+  opacity: 0;
+}
+#roon_app.active, #plex_app.active, #sonos_app.active, #lastfm_app.active {
+  transform: scale(1);
+  opacity: 1;
+}
+
+#roon_app {
+  background-image: url("assets/icons/roon.png");
+} 
+#plex_app {
+  background-image: url("assets/icons/plex.png");
+} 
+#sonos_app {
+  background-image: url("assets/icons/sonos-alt.png");
+} 
+#sonos_volume {
+  max-height: 200px;
+}
+#lastfm_app {
+  background-image: url("assets/icons/lastfm.png");
+}
+
+
+#roon_app.active, #plex_app.active, #sonos_app.active, #lastfm_app.active {
+  z-index: 1;
+}
+
 
 #drag_handle_container {
   position: absolute; 
@@ -127,6 +209,14 @@ body {
   font-size: 24px;
   line-height: 32px;
 }
+.md-fab-speed-dial-horizontal .md-fab-wrapper-small {
+  position: absolute;
+  right: 70px;
+  bottom: 90px;
+  min-height: 48px;
+  width: 48px;
+  z-index: -1;
+}
 .md-fab-speed-dial .md-fab-wrapper-small {
   position: absolute;
   bottom: 100px;
@@ -135,6 +225,8 @@ body {
   width: 38px;
   z-index: -1;
 }
+
+
 .services-btn {
     width: 38px !important;
     height: 38px !important;
@@ -142,9 +234,16 @@ body {
 }
 
 .md-fab-sheet.md-fab-active {
-  height: 400px !important;
-  overflow: auto;
+  padding-right: 60px;
+  padding-left: 6px;
+  width: 310px !important;
+  max-height: 400px !important;
+  overflow: hidden;
 }
+.md-fab-sheet.md-fab-active a:hover {
+  background: rgba(0,0,0,0.1)
+}
+
 
 /* Media Controls */
 .md-fab-toolbar-actions {
