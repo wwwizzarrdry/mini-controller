@@ -18,8 +18,6 @@ npm start
 ## Collapsed
 ![Collapsed 1](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/gallery/collapseed1.PNG)
 
-![Collapsed 2](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/gallery/collapseed2.PNG)
-
 ![Collapsed 3](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/gallery/collapseed3.PNG)
 
 ![Collapsed 4](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/gallery/collapsed4.PNG)
