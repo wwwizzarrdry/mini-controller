@@ -30,11 +30,11 @@ npm start
 
 ![Expanded 2](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/gallery/expanded2.PNG)
 
-![Expanded 3](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/gallery/expanded3.PNG)
+![Expanded 5](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/gallery/expanded5.PNG)
 
 ![Expanded 4](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/gallery/expanded4.PNG)
 
-![Expanded 5](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/gallery/expanded5.PNG)
+![Expanded 3](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/gallery/expanded3.PNG)
 
 ![Expanded 6](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/gallery/expanded6.PNG)
 
