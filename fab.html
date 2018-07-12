@@ -1,6 +1,6 @@
 <!doctype html>
 <!--[if lte IE 9]> <html class="lte-ie9" lang="en"> <![endif]-->
-<!--[if gt IE 9]><!--> <html lang="en" style="background: rgba(0,0,0,0);"> <!--<![endif]-->
+<!--[if gt IE 9]><!--> <html lang="en" class="" style="background: rgba(0,0,0,0);"> <!--<![endif]-->
 
 <head>
     <meta charset="UTF-8">
@@ -38,7 +38,7 @@
 
     <div id="page_content" style="background: rgba(0,0,0,0);">
         <div id="page_content_inner" style="background: rgba(0,0,0,0);">
-            <div id="app_bubble" class="md-fab-wrapper">
+            <div id="app_bubble" class="md-fab-wrapper collapsed player" data-image="">
                 <div class="md-fab md-fab-danger md-fab-toolbar">
                     <i id="main_icon" class="material-icons">play_arrow</i>
                     <!-- Main Content -->
@@ -48,9 +48,9 @@
                                 <div class="uk-width-1-10">
                                     <i class="material-icons md-color-white popup-info">info_outline</i>
                                 </div>
-                                <div class="uk-width-9-10">
-                                    <div class="song-title uk-text-truncate">Subterranean Homesick Blues</div>
-                                    <div><span class="artist uk-text-truncate uk-margin-right">Bob Dylan</span> <span class="album uk-text-truncate">Bringing It All Back Home</span></div>
+                                <div id="lines" class="uk-width-9-10">
+                                    <div id="line1" class="song-title uk-text-truncate"></div>
+                                    <div id="line2"><span class="artist uk-text-truncate"></span> <span class="album uk-text-truncate"></span></div>
                                 </div>
                             </div>
                         </div>
@@ -80,10 +80,12 @@
                                     <a href="javascript:void(0)" id="exit-button" class="" data-uk-tooltip="{pos:'top'}" title="Exit"><i class="material-icons">power_settings_new</i> Exit</a>
                                     <a href="javascript:void(0)" id="zoomin-button" class=""><i class="material-icons">zoom_in</i>Zoom In</a>
                                     <a href="javascript:void(0)" id="zoomout-button" class=""><i class="material-icons">zoom_out</i>Zoom Out</a>
+                                    <a href="javascript:void(0)" id="devtools-button" class=""><i class="material-icons">bug_report</i>Dev Tools</a>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    <!-- M10,0 L400,0 L400,0 L400,100 L400,100 L0,100 L0,100 L0,0 L10,0 -->
                     <svg id="progress_flat" width="400px" height="10px" data-value="0">
                         <path class="bg" stroke="rgba(0,0,0,0.3)" d="M0 10, 390 10"></path>
                         <path class="meter" stroke="#89221f" d="M0 10, 390 10" style="stroke-dasharray: 390; stroke-dashoffset: 390;"></path>
@@ -93,7 +95,7 @@
                         <path class="meter" stroke="#89221f" d="M 100, 100m -75, 0a 75,75 0 1,0 150,0a 75,75 0 1,0 -150,0" fill="none" stroke-dasharray="471" stroke-dashoffset="471"/>
                     </svg>
                 </div>
-                <div id="popup_info" class="no-height"></div>
+                <div id="popup_info" class="artwork no-height"></div>
                 <div id="roon_app" class="no-height">
                     <div class="uk-grid pad-25" data-uk-grid-margin>
                         <div class="uk-width-small-1-4">
@@ -225,7 +227,9 @@
     <!-- select2 -->
     <script src="bower_components/select2/dist/js/select2.min.js"></script>
     <!-- custom scrollbar plugin -->
-	<script src="bower_components/scrollbar/jquery.mCustomScrollbar.concat.min.js"></script>
+    <script src="bower_components/scrollbar/jquery.mCustomScrollbar.concat.min.js"></script>
+    <!-- simplemarquee -->
+	<script src="bower_components/marquee.js"></script>
     <!-- Cookies -->
     <script src="node_modules/js-cookie/src/js.cookie.js"></script>
     <!--  list/grid toggle -->
@@ -247,7 +251,7 @@
             $(".uk-overflow-container").mCustomScrollbar({
 				autoHideScrollbar:true,
 				theme:"rounded"
-			});
+            });
             $window.resize();
         });
     </script>

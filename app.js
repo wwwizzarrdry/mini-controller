@@ -1,6 +1,8 @@
 const windowStateKeeper = require('electron-window-state');
-const ipcMain = require('electron').ipcMain;
-const {app, BrowserWindow} = require('electron');
+const {app, ipcMain, BrowserWindow} = require('electron');
+const { Router } = require('electron-routes');
+const _app = new Router('roonapi');
+
 
   // Splash screen
   let splash 
@@ -27,7 +29,7 @@ const {app, BrowserWindow} = require('electron');
         //--enable-transparent-visuals --disable-gpu
         setTimeout(function(){
             createWindow()
-        },5000)
+        },2500)
   }
 
   // Keep a global reference of the window object, if you don't, the window will
@@ -46,9 +48,9 @@ const {app, BrowserWindow} = require('electron');
         'y': mainWindowState.y,
         'width': 415, //mainWindowState.width,
         'height': 415, //mainWindowState.height,
+        'node-integration': true,
         overlayScrollbars: true,
         show: false,
-        'node-integration': true,
         transparent: true,
         frame: false
     });
@@ -83,6 +85,7 @@ const {app, BrowserWindow} = require('electron');
   // Some APIs can only be used after this event occurs.
   app.on('ready', function(){
       createSplash();
+
         // Listen for async message from renderer process
         var socket = ipcMain;
         socket.on('connection', (event, arg) => {
@@ -97,11 +100,11 @@ const {app, BrowserWindow} = require('electron');
                 sendData("zoneStatus", zoneStatus);
             });
 
-            socket.on('changeVolume', function(msg) {
-                transport.change_volume(msg.output_id, "absolute", msg.volume);
+            socket.on('changeVolume', function(event, data) {
+                transport.change_volume(data.output_id, "absolute", data.volume);
             });
 
-            socket.on('changeSetting', function(msg) {
+            socket.on('changeSetting', function(event, data) {
                 var settings = [];
 
                 if (msg.setting == "shuffle") {
@@ -116,30 +119,33 @@ const {app, BrowserWindow} = require('electron');
                 });
             });
 
-            socket.on('goPrev', function(msg) {
-                transport.control(msg, 'previous');
+            socket.on('goPrev', function(event, data) {
+                console.log("goPrev(msg): ", data) 
+                transport.control(data, 'previous');
             });
 
-            socket.on('goNext', function(msg) {
-                transport.control(msg, 'next');
+            socket.on('goNext', function(event, data) {
+                console.log("goNext(msg): ", data)
+                transport.control(data, 'next');
             });
 
-            socket.on('goPlayPause', function(msg) {
-                transport.control(msg, 'playpause');
+            socket.on('goPlayPause', function(event, data) {
+                transport.control(data, 'playpause');
             });
 
-            socket.on('goPlay', function(msg) {
-                transport.control(msg, 'play');
+            socket.on('goPlay', function(event, data) {
+                console.log("goPlay(msg): ", data)
+                transport.control(data, 'play');
             });
 
-            socket.on('goPause', function(msg) {
-                transport.control(msg, 'pause');
+            socket.on('goPause', function(event, data) {
+                console.log("goPause(msg): ", data)
+                transport.control(data, 'pause');
             });
 
-            socket.on('goStop', function(msg) {
-                transport.control(msg, 'stop');
+            socket.on('goStop', function(event, data) {
+                transport.control(data, 'stop');
             });
-
         });
 
         // Make method externaly visible
@@ -180,7 +186,8 @@ function sendData(event_name, data){
 //var config = require('config');
 //var configPort = config.get('server.port');
 
-var core, transport;
+var RoonApi, RoonApiStatus, RoonApiTransport, RoonApiImage, RoonApiBrowse; 
+var roon, core, transport;
 var pairStatus = 0;
 var zoneStatus = [];
 var zoneList = [];
@@ -277,14 +284,13 @@ function init(){
         }
     });
 
-    var RoonApi = require("node-roon-api"),
-        RoonApiStatus = require("node-roon-api-status"),
-        RoonApiTransport = require('node-roon-api-transport'),
-        RoonApiImage     = require('node-roon-api-image'),
-        RoonApiBrowse    = require('node-roon-api-browse');
+    RoonApi = require("node-roon-api");
+    RoonApiStatus = require("node-roon-api-status");
+    RoonApiTransport = require('node-roon-api-transport');
+    RoonApiImage     = require('node-roon-api-image');
+    RoonApiBrowse    = require('node-roon-api-browse');
         
-    var core;
-    var roon = new RoonApi({
+    roon = new RoonApi({
         extension_id:        'com.wwwizzarrdry.mini.controller',
         display_name:        "Mini Controller",
         display_version:     "0.0.1",
@@ -296,28 +302,46 @@ function init(){
             transport = core_.services.RoonApiTransport;
             v.data.current_zone_id = roon.load_config("current_zone_id");
             pairStatus = true;
-
+            
             // Update Client
             sendData("pairStatus", JSON.parse('{"pairEnabled": ' + pairStatus + '}'));
+            v.data.status = 'connected';
+            sendData("connected", v.data);
             
             transport.subscribe_zones((response, msg) => {
+                
                 if (response == "Subscribed") {
+                    console.log("Subscribed", msg)
                     let zones = msg.zones.reduce((p,e) => (p[e.zone_id] = e) && p, {});
                     v.data.zones = zones;
-
+                    sendData("Subscribed", msg)
                 } else if (response == "Changed") {
                     var z;
-                    if (msg.zones_removed) msg.zones_removed.forEach(e => delete(v.data.zones[e.zone_id]));
-                    if (msg.zones_added)   msg.zones_added  .forEach(e => v.data.zones[e.zone_id] = e);
-                    if (msg.zones_changed) msg.zones_changed.forEach(e => v.data.zones[e.zone_id] = e);
+                    console.log("Changed", msg)
+                    if (msg.zones_removed) {
+                        msg.zones_removed.forEach(e => delete(v.data.zones[e.zone_id]));
+                        sendData("zones_removed", msg.zones_removed)
+                    }
+                    if (msg.zones_added) {
+                        msg.zones_added.forEach(e => v.data.zones[e.zone_id] = e);
+                        sendData("zones_added", msg.zones_added)
+                    }
+                    if (msg.zones_changed) {
+                        msg.zones_changed.forEach(e => v.data.zones[e.zone_id] = e);
+                        v.data.current_zone_id = msg.zones_changed[0].zone_id;
+                        v.data.zones["zid"] = msg.zones_changed[0].zone_id;
+                        sendData("zones_changed", v.data.zones)
+                        
+                    }
+                    if(msg.zones_seek_changed) {
+                        sendData("zones_seek_changed", v.data.zones)
+                        v.data.current_zone_id = msg.zones_seek_changed[0].zone_id;
+                    }
                     v.data.zones = v.data.zones;
-                    
-                    sendData("zoneList", v.data.zones)
-                    sendData("zoneStatus", v)
                 }
             });
             
-            v.data.status = 'connected';
+            roon.save_config("current_zone_id", v.data.current_zone_id);
             v.data.listoffset = 0;
             refresh_browse();
         },
@@ -403,6 +427,7 @@ function init(){
     var go = function() {
         console.log("v", JSON.stringify(v, null, 6));
         v.data.status = 'connecting';
+        sendData("connecting", v.data)
         roon.connect_to_host(v.data.server_ip, v.data.server_port, v.data.server_port, () => setTimeout(go, 3000));
     };
     go();

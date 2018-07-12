@@ -1,10 +1,11 @@
 {
     "roonstate": {
         "tokens": {
-            "acf802ba-c754-4f2e-8aee-fb28a647c835": "ab591dd0-dda6-4482-a458-f30cc31a7f76",
+            "acf802ba-c754-4f2e-8aee-fb28a647c835": "adb72dac-f2cc-4872-93ed-73962ab9bdfe",
             "57972760-02b9-45e6-af16-2e53107f9046": "da921063-1588-40c3-a055-155ee3c65cbb",
             "dca4f85b-8b22-45c1-b5e7-cd9a84fb13cc": "23ec97e7-82ef-46db-9c1d-6c8bcdce0836"
         },
         "paired_core_id": "acf802ba-c754-4f2e-8aee-fb28a647c835"
-    }
+    },
+    "current_zone_id": "1601cdcbf0fbc69c21c05ebbfdfda88079e4"
 }

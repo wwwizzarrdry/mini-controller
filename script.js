@@ -1,32 +1,131 @@
 // Electron
-const {webFrame} = require('electron')
-const ipcRenderer = require('electron').ipcRenderer;
-const remote = require('electron').remote;
+const {webFrame,ipcRenderer,remote} = require('electron');
 const main = remote.require("./app.js");
 const win = remote.getCurrentWindow();
+
 let currentZoomFactor = webFrame.getZoomFactor();
+
+var data = new Object();
+data.id = randID_generator();
+var zoneid;
+var nowPlaying = {
+	artwork: $(".artwork"),
+	miniartwork: $(".player"),
+	title: $(".song-title"),
+	album: $(".album"),
+	artist: $(".artist") 
+};
+var $audio = $("#player"),
+	$app = $("#app_bubble"),
+	$main_icon = $("#main_icon"),
+	$drag = $("#drag_handle_container"),
+	$fab_toolbar = $('.md-fab-toolbar'),
+	$fab_speeddial = $('.md-fab-speed-dial'),
+	$fab_sheet = $('.md-fab-sheet'),
+	$popup_info = $('#popup_info'),
+	$bottomBar  = $("#bottom_bar_nav"),
+	$playBtn = $(".transport-play"),
+	$pauseBtn = $(".transport-pause"),
+	$prevBtn = $(".transport-prev"),
+	$nextBtn = $(".transport-next"),
+	$volumeBtn = $(".transport-volume");
+
 
 
 // Receive data from main process
+// ##############################
+var io = {
+	emit: function(event, data) {
+		ipcRenderer.send(event, data);
+	}
+};
+io.emit('connection', data);
+
+ipcRenderer.on('hello', (event, arg) => {  
+	console.log('hello: ', arg);
+	$("#line1,#line2").simplemarquee({
+		cycles: Infinity,
+		delayBetweenCycles: 2000,
+		handleHover: false
+	});
+	zoneid = localStorage.getItem("current_zone_id");
+});
+
+// Incoming Msgs
 ipcRenderer.on('send-data', function (event, payload) {
 	//console.log(payload.event, payload);
 	switch(payload.event) {
+		case "Subscribed":
+		      console.log('Subscribed', payload)
+		      break;
+		case 'connecting':
+		      console.log('connecting', payload)
+	     	  $.each(nowPlaying, function(key, val) {
+				if(key !== "miniartwork" ) {
+					el.empty();
+				}
+			  });
+			  nowPlaying.title.html("<span class='uk-text-uppercase'>Select a zone...</span>");
+			  nowPlaying.artist.html("<span class='uk-text-uppercase'>" + payload.status + "</span>");
+			  break;
+		case 'connected':
+		      console.log('connected', payload);
+			  $.each(nowPlaying, function(key, el) {
+				  if(key !== "miniartwork" ) {
+					  el.empty();
+				  }
+		      });
+			  nowPlaying.title.html("<span class='uk-text-uppercase'>" + payload.status + "</span>");
+			  nowPlaying.artist.html("<span class='uk-text-uppercase'>" + zoneid + "</span>");
+		      break;			  
 		case 'pairStatus':
+		       console.log("pairStatus", payload)
 		       //UIkit.modal.alert("<h3><i class='uk-icon-check'></i>" + payload.event  + "</h3><div class='uk-overflow-container'><pre>" + JSON.stringify(payload, null, 6) + "</pre></div>");
 			   var pairEnabled = payload.pairEnabled;
 			   if (pairEnabled === true ) {
-				   showSection('nowPlaying');
+				   //showSection('nowPlaying');
 			   } else {
-	               showSection('pairDisabled');
+	               //showSection('pairDisabled');
 			   }  
 			   break;
-		case 'zoneStatus':
-		       //UIkit.modal.alert("<h3><i class='uk-icon-check'></i>" + payload.event  + "</h3><div class='uk-overflow-container'><pre>" + JSON.stringify(payload, null, 6) + "</pre></div>");
-			  //console.log('zoneStatus', payload)
+		case 'zones_removed':	
+		      console.log('zones_removed', payload) 
+			  break;
+		case 'zones_added':
+		      console.log('zones_added', payload) 
+		      break;
+		case 'zones_changed':
+			   console.log('zones_changed', payload)
+			   zoneid = payload["zid"];
+			   localStorage.setItem("current_zone_id", zoneid);
+
+			   if(payload[zoneid].state == "playing") {
+				   showPauseBtn();
+				   np = payload[zoneid].now_playing;
+				   // artwork
+				   nowPlaying.artwork.css("background-image", "url(http://192.168.2.115:9100/api/image/" + np.image_key + "?scale=fill&width=400&height=400&format=image/jpeg)");
+				   nowPlaying.miniartwork.css("background-image", "url(http://192.168.2.115:9100/api/image/" + np.image_key + "?scale=fill&width=400&height=400&format=image/jpeg)");
+				   // song-title
+				   nowPlaying.title.html(np.three_line.line1)
+				   // artist
+				   nowPlaying.artist.html(np.three_line.line2)
+				   // album
+				   nowPlaying.album.html(np.three_line.line3)
+
+			   } else if(payload[zoneid].state == "paused") {
+				   showPlayBtn();
+			   }
+			   break;
+		case 'zones_seek_changed':
+			   console.log('zones_seek_changed', payload)
+			   if(payload[zoneid].state == "playing") {
+				   var progress = (payload[zoneid].now_playing.seek_position / payload[zoneid].now_playing.length * 100).toFixed(0);
+				   updateProgress(progress);
+			   }
 			   break;
 		case 'zoneList':
 		       //UIkit.modal.alert("<h3><i class='uk-icon-check'></i>" + payload.event  + "</h3><div class='uk-overflow-container'><pre>" + JSON.stringify(payload, null, 6) + "</pre></div>");
-			   $(".zoneList").html("");
+			   //console.log("zoneList", payload);  
 			   if (payload !== undefined) {
 				   for (var x in payload){
 					   $(".zoneList").append("<button type=\"button\" class=\"buttonOverlay buttonZoneId\" id=\"button-" + payload[x].zone_id + "\" onclick=\"selectZone(\'" + payload[x].zone_id + "\', \'" + payload[x].display_name + "\')\">" + payload[x].display_name + "</button>");
@@ -67,18 +166,16 @@ ipcRenderer.on('send-data', function (event, payload) {
 	}
 });
 
-var data = new Object();
-var io = {
-	emit: function(event, data) {
-		ipcRenderer.send(event, data);
-	}
-};
-data.id = randID_generator();
-io.emit('connection', data);
 
-ipcRenderer.on('hello', (event, arg) => {  
-    console.log('hello: ', arg);
-});
+
+
+
+
+
+
+
+
+
 
 // To-Do
 function showSection(sectionName) {
@@ -118,18 +215,8 @@ function showSection(sectionName) {
     }, 250);
 }
 
-// Shadow Box on Move
-win.on("move", function( event ) {
-	console.log("move", event.sender.getBounds() );
-	clearTimeout(movetimer);
-	$("html").css("background", "rgba(0,0,0,0.15)");
-	movetimer();
-});
-var movetimer = function() {
-	setTimeout(function(){
-		$("html").css("background", "rgba(0,0,0,0)")
-	},1000);
-};
+
+/* window controls*/
 
 // Focus Blur
 window.addEventListener("blur",  function(){ 
@@ -139,23 +226,7 @@ window.addEventListener("blur",  function(){
 window.addEventListener("focus", function(){ 
 	console.log("focus");
 });
-
-var $audio = $("#player"),
-    $app = $("#app_bubble"),
-	$drag = $("#drag_handle_container"),
-	$bottomBar  = $("#bottom_bar_nav"),
-	$playBtn = $(".transport-play"),
-	$pauseBtn = $(".transport-pause"),
-	$prevBtn = $(".transport-prev"),
-	$nextBtn = $(".transport-next"),
-	$volumeBtn = $(".transport-volume");
-
 function collapse() { 
-	var $fab_toolbar = $('.md-fab-toolbar');
-	var $fab_speeddial = $('.md-fab-speed-dial');
-	var $fab_sheet = $('.md-fab-sheet');
-	var $popup_info = $('#popup_info');
-
 	$popup_info.addClass("no-height");
 	setTimeout(function(){
 		// Sheet
@@ -170,12 +241,27 @@ function collapse() {
 			$fab_toolbar.css('width','').removeClass('md-fab-active');
 			setTimeout(function() {
 				$fab_toolbar.removeClass('md-fab-animated');
+				$app.removeClass("expanded").addClass("collapsed");
 			},140);
-		};
-    }, 140);
+		};		
+    }, 240);
 };
 
-/* window controls*/
+
+// Shadow Box on Move
+var movetimer = function() {
+	setTimeout(function(){
+		$("html").css("background", "rgba(0,0,0,0)")
+	},1000);
+};
+win.on("move", function( event ) {
+	console.log("move", event.sender.getBounds() );
+	clearTimeout(movetimer);
+	$("html").css("background", "rgba(0,0,0,0.15)");
+	movetimer();
+});
+
+
 var dragTimer;
 $document.on("mouseenter", "#app_bubble", function(){
 	clearTimeout(dragTimer);
@@ -183,8 +269,8 @@ $document.on("mouseenter", "#app_bubble", function(){
 	dragTimer = setTimeout(function(){
 		$drag.addClass("uk-hidden");
 	},5000);
-	
 });
+
 $document.on("mouseenter", "#drag_handle_container, #drag_handle", function(){
 	clearTimeout(dragTimer);
 	$drag.removeClass("uk-hidden");
@@ -194,6 +280,16 @@ $document.on("mouseenter", "#drag_handle_container, #drag_handle", function(){
 		$drag.addClass("uk-hidden");
 	},1000);
 });
+
+
+
+$app.dblclick(function(){
+	if($(this).hasClass("expanded")) {
+		collapse();
+	}
+});
+
+
 
 $("#reload-button").click( function() {
 	UIkit.notify("reload")
@@ -244,6 +340,10 @@ $("#zoomin-button").click( function() {
 $("#zoomout-button").click( function() {
 	currentZoomFactor = currentZoomFactor - 0.05;
 	webFrame.setZoomFactor(currentZoomFactor);
+});
+
+$("#devtools-button").click( function() {
+	win.webContents.openDevTools();
 });
 
 
@@ -434,6 +534,22 @@ $("#popup_info").click( function(e) {
 
 
 /* Media Controls */
+function showPauseBtn(){
+	$playBtn.addClass("uk-hidden");
+	$pauseBtn.removeClass("uk-hidden");
+	$app.addClass("playing");
+	$("#main_icon").html("pause")
+}
+function showPlayBtn(){
+	$playBtn.removeClass("uk-hidden");
+	$pauseBtn.addClass("uk-hidden");
+	$app.removeClass("playing");
+	$("#main_icon").html("pause")
+}
+
+
+
+
 $(".popup-info").click( function() {
 	//$("#roon_app,#plex_app,#sonos_app,#lastfm_app").addClass("no-height").removeClass("active");
 	/*
@@ -449,7 +565,7 @@ $(".popup-info").click( function() {
 $(".transport-pause").click( function() {
 	$("#main_icon").removeClass("timer").addClass("material-icons").html("play_arrow");
 	//$audio[0].pause();
-	io.emit('goPause', data);
+	io.emit('goPause', zoneid);
 	$pauseBtn.addClass("uk-hidden");
 	$playBtn.removeClass("uk-hidden");
 
@@ -460,21 +576,21 @@ $(".transport-play").click( function() {
 	//$audio[0].play();
 	$playBtn.addClass("uk-hidden");
 	$pauseBtn.removeClass("uk-hidden");
-	io.emit('goPlay', data);
+	io.emit('goPlay', zoneid);
 });
 
 $(".transport-prev").click( function() {
 	$audio[0].currentTime = 0;
 	$pauseBtn.addClass("uk-hidden");
 	$playBtn.removeClass("uk-hidden");
-	io.emit('goPrev', data);
+	io.emit('goPrev', zoneid);
 });
 
 $(".transport-next").click( function() {
 	$audio[0].currentTime = $audio[0].duration;
 	$pauseBtn.addClass("uk-hidden");
 	$playBtn.removeClass("uk-hidden");
-	io.emit('goNext', data);
+	io.emit('goNext', zoneid);
 });
 
 
@@ -492,28 +608,28 @@ $(".transport-volume").click( function() {
 var $viewToggle = $('#list_grid_toggle').children('a[data-view]'),
     $listGrid = $('#list_grid');
 
-    $viewToggle.each(function() {
-        if($(this).hasClass('uk-active')) {
-            $listGrid.addClass($viewToggle.attr('data-view'));
-        }
-    });
+$viewToggle.each(function() {
+	if($(this).hasClass('uk-active')) {
+		$listGrid.addClass($viewToggle.attr('data-view'));
+	}
+});
 
-    // set view class on init
-    $document.on('click', '#list_grid_toggle a[data-view]', function(e) {
-        e.preventDefault();
-        var $this = $(this),
-			isActive = $this.hasClass('uk-active');
-			
-        if(!isActive) {
-            var view = $this.attr('data-view');
-            if(view == 'list_view') {
-                $listGrid.addClass('list_view').removeClass('grid_view');
-            } else {
-                $listGrid.addClass('grid_view').removeClass('list_view');
-            }
-            $this.addClass('uk-active').siblings().removeClass('uk-active');
-        }
-	});
+// set view class on init
+$document.on('click', '#list_grid_toggle a[data-view]', function(e) {
+	e.preventDefault();
+	var $this = $(this),
+		isActive = $this.hasClass('uk-active');
+		
+	if(!isActive) {
+		var view = $this.attr('data-view');
+		if(view == 'list_view') {
+			$listGrid.addClass('list_view').removeClass('grid_view');
+		} else {
+			$listGrid.addClass('grid_view').removeClass('list_view');
+		}
+		$this.addClass('uk-active').siblings().removeClass('uk-active');
+	}
+});
 
 // Get all the SVG timeline Paths (Meters)
 var meters = document.querySelectorAll('svg[data-value] .meter');
@@ -521,29 +637,21 @@ var elapsed = 0
 var duration = 0;
 var durPercent = 0;
 var timerDisplay = moment().format("hh:mm:ss A");
-setInterval(function(){
+/*setInterval(function(){
 	elapsed = $audio[0].currentTime;
 	duration = $audio[0].duration;
 	durPercent = ((elapsed/duration)*100).toFixed(0);
 	timerDisplay = moment.duration(elapsed, 'seconds').format("mm:ss");
 	if (durPercent <= 100 && (!$audio[0].paused||$audio[0].currentTime > 0)) {
-		updateProgress(durPercent);
+		updateProgress(data.zones_seek_changed);
 		$("#main_icon").html(timerDisplay);
 	} else {
 		window.clearInterval();
 		$("#main_icon").removeClass("timer").addClass("material-icons").html("play_arrow");
 	}
-}, 1000);
-function updateProgress(perc) {
-	/*
-	UIkit.notify({
-		message: "elapsed: " + elapsed + ", duration: " + duration + ", Perc: " + perc+"%",
-		status: "info",
-		pos: "bottom-center",
-		timeout: 300
-	});
-	*/
+}, 1000);*/
 
+function updateProgress(perc) {
 	meters.forEach(function (path) {
 	// Get the length of the path
 	var length = path.getTotalLength();
@@ -551,10 +659,13 @@ function updateProgress(perc) {
 	// or uncomment to set it dynamically
 	// path.style.strokeDashoffset = length;
 	// path.style.strokeDasharray = length;
+	
 	// Get the value of the meter
 	var value = perc; //parseInt(path.parentNode.getAttribute('data-value'));
+
 	// Calculate the percentage of the total length
 	var to = length * ((100 - value) / 100);
+
 	path.getBoundingClientRect();
 	// Set the Offset
 	path.style.strokeDashoffset = Math.max(0, to);
