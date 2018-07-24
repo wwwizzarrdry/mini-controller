@@ -2,6 +2,7 @@
 Mini controller for Roon, Sonos, Plex and LastFM
 Built using Electron and Material UIkit. 
 App launches as a small FAB button inspired by the Google Hangouts extension.
+There are some rudimentary Roon transport calls that work, but this is just UI stuffs right now.
 
 ## Getting Started
 ```
