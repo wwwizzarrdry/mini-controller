@@ -6,7 +6,10 @@ There are some rudimentary Roon transport calls that work, but this is just UI s
 
 ## Getting Started
 ```
+npm install
+npm run build
 npm start
+
 ```
 
 
@@ -15,6 +18,10 @@ npm start
 ## SVG Splash Screen
 ![Splash](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/gallery/splashscreen.PNG)
 
+## Widget Sidebar
+![Appbar Expanded](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/appbar-expanded.PNG)
+![Appbar Collapsed](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/appbar-collapsed.PNG)
+![Mini Player Expanded](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/appbar-collapsed-open.PNG)
 
 ## Collapsed
 ![Collapsed 1](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/gallery/collapseed1.PNG)
