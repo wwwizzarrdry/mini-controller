@@ -20,7 +20,7 @@ npm start
 
 ## Widget Sidebar
 ![Appbar Expanded](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/appbar-expanded.PNG)
-![Appbar Collapsed](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/appbar-collapsed.PNG)
+![Appbar Collapsed](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/appbar-collapsed0.PNG)
 ![Mini Player Expanded](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/appbar-collapsed-open.PNG)
 
 ## Collapsed
