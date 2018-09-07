@@ -22,6 +22,9 @@ npm start
 ![Appbar Expanded](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/appbar-expanded.PNG)
 ![Appbar Collapsed](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/appbar-collapsed0.PNG)
 ![Mini Player Expanded](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/appbar-collapsed-open.PNG)
+![Appbar Disk](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/appbardsk0.PNG)
+![Appbar CPU](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/appbarcpu1.PNG)
+![Appbar Memory](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/appbarcmem1.PNG)
 
 ## Collapsed
 ![Collapsed 1](https://github.com/wwwizzarrdry/mini-controller/blob/master/assets/img/gallery/collapseed1.PNG)
